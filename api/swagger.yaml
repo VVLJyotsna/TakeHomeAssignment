@@ -1,0 +1,153 @@
+---
+swagger: "2.0"
+info:
+  description: "This is a server to store Person info"
+  version: "1.0.0"
+  title: "Person"
+  contact:
+    email: "apiteam@swagger.io"
+host: "localhost:8080"
+basePath: "/person"
+tags:
+- name: "person"
+  description: "Everything about a Person"
+schemes:
+- "http"
+paths:
+  /data:
+    put:
+      tags:
+      - "person"
+      summary: "Add a person"
+      description: ""
+      operationId: "addPerson"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Person object that needs to be added."
+        required: true
+        schema:
+          $ref: "#/definitions/Person"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        400:
+          description: "Invalid input"
+        405:
+          description: "Validation exception"
+      security:
+      - person_auth:
+        - "write:person"
+        - "read:person"
+      x-swagger-router-controller: "Person"
+  /data/{dataId}:
+    get:
+      tags:
+      - "person"
+      summary: "Find person by ID"
+      description: "Returns a single person information"
+      operationId: "getPersonById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "dataId"
+        in: "path"
+        description: "ID of person to return"
+        required: true
+        type: "string"
+        format: "uuid"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Person"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Person not found"
+          schema:
+            $ref: "#/definitions/Error"
+      security:
+      - api_key: []
+      x-swagger-router-controller: "Person"
+    delete:
+      tags:
+      - "person"
+      summary: "Deletes a person"
+      description: ""
+      operationId: "deletePerson"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "dataId"
+        in: "path"
+        description: "Person id to delete"
+        required: true
+        type: "string"
+        format: "uuid"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Person not found"
+          schema:
+            $ref: "#/definitions/Error"
+      security:
+      - person_auth:
+        - "write:person"
+        - "read:person"
+      x-swagger-router-controller: "Person"
+securityDefinitions:
+  person_auth:
+    type: "oauth2"
+    authorizationUrl: "http://localhost/oauth/dialog"
+    flow: "implicit"
+    scopes:
+      write:person: "modify person in your account"
+      read:person: "read your person"
+  api_key:
+    type: "apiKey"
+    name: "api_key"
+    in: "header"
+definitions:
+  Person:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      age:
+        type: "integer"
+        format: "int64"
+      locale:
+        type: "string"
+  ApiResponse:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      name:
+        type: "string"
+      age:
+        type: "integer"
+        format: "int64"
+      locale:
+        type: "string"
+  Error:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int64"
+      message:
+        type: "string"
